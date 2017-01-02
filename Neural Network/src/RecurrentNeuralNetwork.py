@@ -5,13 +5,14 @@ import nltk
 import numpy as np
 
 
-def softmax():
-    pass
-
+def softmax(v):
+    exp_scores = np.exp(v)
+    probs = exp_scores / np.sum(exp_scores, keepdims=True)
+    return probs
 
 class RNNNumpy:
 
-    def __init__(self, word_dim, hidden_dim, bptt_truncate=4):
+    def __init__(self, word_dim, hidden_dim=100, bptt_truncate=4):
         # Assign instance variables
         self.word_dim = word_dim
         self.hidden_dim = hidden_dim
@@ -30,7 +31,7 @@ class RNNNumpy:
         s[-1] = np.zeros(self.hidden_dim)
 
         #The output at each time step. Again, we save them for later.
-        o = np.zeros((T, self.hidden_dim))
+        o = np.zeros((T, self.word_dim))
 
         #For each time step
         for t in np.arange(T):
@@ -46,6 +47,7 @@ class RNNNumpy:
         return np.argmax(o, 1)
 
 if __name__ == '__main__':
+
     vocabulary_size = 8000
     unknown_token = 'UNKNOWN_TOKEN'
     sentence_start_token = 'SENTENCE_START'
@@ -84,3 +86,9 @@ if __name__ == '__main__':
 
     X_train = np.asarray([[word_to_index[w] for w in sent[:-1]] for sent in tokenized_sentences])
     y_train = np.asarray([[word_to_index[w] for w in sent[1:]] for sent in tokenized_sentences])
+
+    model = RNNNumpy(vocabulary_size)
+    o, s = model.forward_propagation(X_train[10])
+    print o.shape
+    print o
+
