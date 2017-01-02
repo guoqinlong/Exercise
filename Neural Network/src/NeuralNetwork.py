@@ -40,3 +40,12 @@ if __name__ == "__main__":
     clf.fit(X, Y)
 
     plot_decision_boundary(lambda x: clf.predict(x), X, Y)
+
+    num_examples = len(X)
+    nn_input_dim = 2
+    nn_output_dim = 2
+
+    epsilon = 0.01
+    reg_lambda = 0.01    
+
+
