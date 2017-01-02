@@ -40,6 +40,11 @@ class RNNNumpy:
 
         return [o, s]
 
+    def predict(self, x):
+        # Perform forward propagation, return the index with max value.
+        o, s = self.forward_propagation(x)
+        return np.argmax(o, 1)
+
 if __name__ == '__main__':
     vocabulary_size = 8000
     unknown_token = 'UNKNOWN_TOKEN'
