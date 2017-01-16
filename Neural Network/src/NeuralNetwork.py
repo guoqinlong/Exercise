@@ -29,7 +29,7 @@ def plot_decision_boundary(pred_func, x, y):
 
     # Plot the contour and training examples
     plt.contourf(xx, yy, z)
-    plt.scatter(X[:, 0], x[:, 1], c=y)
+    plt.scatter(x[:, 0], x[:, 1], c=y)
     plt.show()
 
 
@@ -110,13 +110,14 @@ def build_model(nn_hdim, x, y, num_passes=20000, print_loss=False):
     return model
 
 if __name__ == "__main__":
+
     X, Y = random_data()
     num_examples = len(X)
     nn_input_dim = 2
     nn_output_dim = 2
 
     epsilon = 0.01
-    reg_lambda = 0.01
+    reg_lambda = 0.01    
 
     model = build_model(3, X, Y, print_loss=False)
     plot_decision_boundary(lambda x : predict(model, x), X, Y)
