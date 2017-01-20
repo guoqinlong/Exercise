@@ -44,6 +44,18 @@ class TextCNN(object):
         self.h_pool = tf.concat(3, pooled_outputs)
         self.h_pool_flat = tf.reshape(self.h_pool, [-1, num_filters_total])
 
+        # Add dropout
+        with tf.name_scope("dropout"):
+            self.h_drop = tf.nn.dropout(self.h_pool_flat, self.dropout_keep_prob)
+
+        # Add scores and predictions
+        with tf.name_scope("output"):
+            W = tf.Variable(tf.truncate_normal([num_filters_total, num_classes], stddev=0.1), name='W')
+            b = tf.Variable(tf.constant(value=0.1, shape=[num_classes]), name='b')
+            self.scores = tf.nn.xw_plus_b(self.h_drop, W, b, name="scores")
+            self.predictions = tf.argmax(self.scores, name='predictions')
+            
+
 
 if __name__ == '__main__':
     a = tf.placeholder(tf.int16)
