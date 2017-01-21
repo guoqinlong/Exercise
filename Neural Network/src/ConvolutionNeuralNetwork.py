@@ -1,4 +1,7 @@
 import tensorflow as tf
+from tensorflow.tensorboard.tensorboard import FLAGS
+
+
 class TextCNN(object):
     """
     A CNN for text classification.
@@ -67,9 +70,12 @@ class TextCNN(object):
 
 
 if __name__ == '__main__':
-    with tf.Session() as sess:
-        cnn = TextCNN(59, 3, 200, 100, [1, 1, 1], 3)
-        merged = tf.merge_all_summaries()
-        writer = tf.train.SummaryWriter("log", sess.graph)
-        writer.add_graph(sess.graph_def)
-        writer.close()
+    with tf.Graph().as_default():
+        session_conf = tf.ConfigProto(
+            allow_soft_placement=FLAGS.allow_soft_placement,
+            log_device_placement=FLAGS.log_device_placement
+        )
+        sess = tf.Session(session_conf)
+        with sess.as_default():
+            pass
+
