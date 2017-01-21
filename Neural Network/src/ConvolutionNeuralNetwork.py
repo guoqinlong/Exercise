@@ -12,7 +12,7 @@ class TextCNN(object):
         self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
 
         with tf.device('/cpu:0'), tf.name_scope('embedding'):
-            W = tf.variables(tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0), name='W')
+            W = tf.Variable(tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0), name='W')
             self.embedded_chars = tf.nn.embedding_lookup(W, self.input_x)
             self.embedded_chars_expand = tf.expand_dims(self.embedded_chars, -1)
 
@@ -20,9 +20,9 @@ class TextCNN(object):
         for i, filter_size in enumerate(filter_sizes):
             # Convolution layer
             filter_shape = [filter_size, embedding_size, 1, num_filters]
-            W = tf.variables(tf.truncated_normal(filter_shape, stddev=0.1), name='W')
-            b = tf.variables(tf.constant(0.1, shape=[num_filters]), name='b')
-            conv = tf.conv2d(
+            W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1), name='W')
+            b = tf.Variable(tf.constant(0.1, shape=[num_filters]), name='b')
+            conv = tf.nn.conv2d(
                 input=self.embedded_chars_expand,
                 filter=W,
                 strides=[1, 1, 1, 1],
@@ -50,18 +50,26 @@ class TextCNN(object):
 
         # Add scores and predictions
         with tf.name_scope("output"):
-            W = tf.Variable(tf.truncate_normal([num_filters_total, num_classes], stddev=0.1), name='W')
+            W = tf.Variable(tf.truncated_normal([num_filters_total, num_classes], stddev=0.1), name='W')
             b = tf.Variable(tf.constant(value=0.1, shape=[num_classes]), name='b')
             self.scores = tf.nn.xw_plus_b(self.h_drop, W, b, name="scores")
-            self.predictions = tf.argmax(self.scores, name='predictions')
-            
+            self.predictions = tf.argmax(self.scores, 1, name='predictions')
+
+        # Calculate mean cross-entropy loss
+        with tf.name_scope("loss"):
+            losses = tf.nn.softmax_cross_entropy_with_logits(self.scores, self.input_y)
+            self.loss = tf.reduce_mean(losses)
+
+        # Calculate Accuracy
+        with tf.name_scope('accuracy'):
+            correct_predictions = tf.equal(self.predictions, tf.argmax(self.input_y, 1))
+            self.acccurcy =  tf.reduce_mean(tf.cast(correct_predictions,"float"), name="accuracy")
 
 
 if __name__ == '__main__':
-    a = tf.placeholder(tf.int16)
-    b = tf.placeholder(tf.int16)
-    with tf.device('/cpu:0'), tf.Session() as sess:
-        add = tf.add(a, b)
-        mul = tf.mul(a, b)
-        print(sess.run(add, feed_dict={a: 3, b: 2}))
-        print(sess.run(mul, feed_dict={a: 4, b: 3}))
+    with tf.Session() as sess:
+        cnn = TextCNN(59, 3, 200, 100, [1, 1, 1], 3)
+        merged = tf.merge_all_summaries()
+        writer = tf.train.SummaryWriter("log", sess.graph)
+        writer.add_graph(sess.graph_def)
+        writer.close()
