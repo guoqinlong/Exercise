@@ -1,3 +1,6 @@
+import os
+from datetime import time
+
 import tensorflow as tf
 from tensorflow.tensorboard.tensorboard import FLAGS
 
@@ -66,7 +69,7 @@ class TextCNN(object):
         # Calculate Accuracy
         with tf.name_scope('accuracy'):
             correct_predictions = tf.equal(self.predictions, tf.argmax(self.input_y, 1))
-            self.acccurcy =  tf.reduce_mean(tf.cast(correct_predictions,"float"), name="accuracy")
+            self.accuracy = tf.reduce_mean(tf.cast(correct_predictions,"float"), name="accuracy")
 
 
 if __name__ == '__main__':
@@ -89,4 +92,21 @@ if __name__ == '__main__':
             grads_and_vars = optimizer.compute_gradients(cnn.loss)
             train_op = optimizer.apply_gradients(grads_and_vars, global_step=global_step)
 
+            # Output directory for models and summaries
+            timestamp = str(int(time.time()))
+            out_dir = os.path.abspath(os.path.join(os.path.curdir, "run", timestamp))
+            print("Writing to {} \n".format(out_dir))
 
+            # Summary for loss and accuracy
+            loss_summary = tf.summary.scalar("loss", cnn.loss)
+            acc_summary = tf.summary.scalar("accuracy", cnn.acccuracy)
+
+            # Train summaries
+            train_summary_op = tf.summary.merge([loss_summary, acc_summary])
+            train_summary_dir = os.path.join(out_dir, "summary", "train")
+            train_summary_writer = tf.train.SummaryWriter(train_summary_dir, sess.graph_def)
+
+            # Dev summaries
+            dev_summary_op = tf.summary.merge([loss_summary, acc_summary])
+            dev_summary_dir = os.path.join(out_dir, "summary", "dev")
+            dev_summary_writer = tf.train.SummaryWriter(dev_summary_dir, sess.graph_def)
