@@ -77,5 +77,16 @@ if __name__ == '__main__':
         )
         sess = tf.Session(session_conf)
         with sess.as_default():
-            pass
+            cnn = TextCNN(
+                sequence_length=x_train.shape[1],
+                num_classes=2,
+                vocab_size=len(vocabulary),
+                embedding_size=FLAGS.embedding_dim,
+                filter_sizes=map(int, FLAGS.filter_sizes.split(",")),
+                num_filters=FLAGS.num_filters)
+            global_step = tf.Variable(0, name="global_step", trainable=False)
+            optimizer = tf.train.AdamOptimizer(1e-4)
+            grads_and_vars = optimizer.compute_gradients(cnn.loss)
+            train_op = optimizer.apply_gradients(grads_and_vars, global_step=global_step)
+
 
