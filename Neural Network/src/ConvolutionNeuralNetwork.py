@@ -1,8 +1,8 @@
 import os
 from datetime import time
-
 import tensorflow as tf
 from tensorflow.tensorboard.tensorboard import FLAGS
+import datetime
 
 
 class TextCNN(object):
@@ -72,6 +72,37 @@ class TextCNN(object):
             self.accuracy = tf.reduce_mean(tf.cast(correct_predictions,"float"), name="accuracy")
 
 
+def train_step(x_batch, y_batch):
+    """
+    A single training step
+    """
+    feed_dict = {
+        cnn.input_x: x_batch,
+        cnn.input_y: y_batch,
+        cnn.dropout_keep_prob: FLAGS.dropout_keep_prob
+    }
+    _, step, summaries, loss, accuracy = sess.run([train_op, global_step, train_summary_op, cnn.loss, cnn.accuracy], feed_dict)
+    time_str = datetime.datetime.isoformat()
+    print("{}: step {}, loss {:g}, acc {:g}").format(time_str, step, loss, accuracy)
+    train_summary_writer.add_summary(summaries, step)
+
+
+def dev_step(x_batch, y_batch, writer=None):
+    """
+    Evaluates model on a dev set
+    """
+    feed_dict = {
+        cnn.input_x : x_batch,
+        cnn.input_y : y_batch,
+        cnn.dropout_keep_prob : 1.0
+    }
+    step, summaries, loss, accuracy = sess.run([global_step, dev_summary_op, cnn.loss, cnn.accuracy], feed_dict)
+    time_str = datetime.datetime().isoformat()
+    print("{}: step {}, loss {:g}, acc {:g}").format(time_str, step, loss, accuracy)
+    if writer:
+        writer.add_summary(summaries, step)
+
+
 if __name__ == '__main__':
     with tf.Graph().as_default():
         session_conf = tf.ConfigProto(
@@ -110,3 +141,17 @@ if __name__ == '__main__':
             dev_summary_op = tf.summary.merge([loss_summary, acc_summary])
             dev_summary_dir = os.path.join(out_dir, "summary", "dev")
             dev_summary_writer = tf.train.SummaryWriter(dev_summary_dir, sess.graph_def)
+
+            # Checkpointing
+            checkpoint_dir = os.path.abspath(os.path.join(out_dir, "checkpoints"))
+            checkpoint_prefix = os.path.join(checkpoint_dir, "model")
+            # Tensorflow assumes this directory already exists so we need to create it.
+            if not os.path.exists(checkpoint_prefix):
+                os.makedirs(checkpoint_prefix)
+            saver = tf.train.Saver(tf.all_variables())
+
+            #Initialize all variables.
+            sess.run(tf.initialize_all_variables())
+
+            
+
