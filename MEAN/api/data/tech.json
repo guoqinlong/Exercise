@@ -1,0 +1,29 @@
+[{
+	"_id": {
+		"$oid": "588b1701a87c5125104d0b21"
+	},
+	"name": "Mean",
+	"role": "Database"
+},
+{
+	"_id": {
+		"$oid": "588b1701a87c5125104d0b22"
+	},
+	"name": "Express",
+	"role": "Web application server"
+},
+{
+	"_id": {
+		"$oid": "588b1701a87c5125104d0b23"
+	},
+	"name": "Angular",
+	"role": "Front-end framework"
+},
+{
+	"_id": {
+		"$oid": "588b1701a87c5125104d0b24"
+	},
+	"name": "Node.js",
+	"role": "Platform"
+}]
+
