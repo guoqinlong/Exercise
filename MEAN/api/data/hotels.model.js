@@ -5,7 +5,7 @@ var reviewSchema = new mongoose.Schema({
         type : String,
         required : true
     },
-    stars : {
+    rating : {
         type : Number,
         min : 0,
         max : 5,
@@ -17,7 +17,7 @@ var reviewSchema = new mongoose.Schema({
     },
     createdOn : {
         type : Date,
-        detault : Date.now
+        default : Date.now
     }
 });
 
