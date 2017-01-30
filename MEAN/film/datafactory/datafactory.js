@@ -9,15 +9,15 @@ function FilmFactory($http) {
         return $http.get('http://swapi-tpiros.rhcloud.com/films').then(completed).catch(failed);
     }
 
-    function getOneFilm() {
+    function getOneFilm(id) {
         return $http.get('http://swapi-tpiros.rhcloud.com/films/' + id).then(completed).catch(failed);
     }
 
-    function completed() {
+    function completed(response) {
         return response.data;
     }
 
-    function failed() {
+    function failed(response) {
         return response.statusText;
     }
 }
